@@ -65,7 +65,7 @@ docker-compose up --build
 
 Todas as rotas exceto `/auth/**` requerem o token JWT no header.
 
-## Autores
+## Integrantes
 
 - Vinicius Kenzo Tocuyosi — RM 559982
 - João Victor Alves da Silva — RM 559726

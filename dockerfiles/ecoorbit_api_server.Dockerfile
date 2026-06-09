@@ -1,6 +1,6 @@
 FROM eclipse-temurin:25-jdk-alpine AS build
 WORKDIR /app
-COPY . .
+COPY ../ecoorbit_api_server .
 RUN ./mvnw clean package -DskipTests
 
 FROM eclipse-temurin:25-jre-alpine

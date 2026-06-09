@@ -14,7 +14,40 @@ stages:
               containerRegistry: "javamssqlrm559982"
               repository:        "ecoorbit-deploy"
               command:           "buildAndPush"
-              Dockerfile:        "**/Dockerfile"
+              Dockerfile:        "ecoorbit_api_server/Dockerfile"
               tags: |
                 $(Build.BuildId)
                 latest
+
+          - task: Docker@2
+            displayName: "Build e Push da imagem"
+            inputs:
+              containerRegistry: "javamssqlrm559982"
+              repository:        "ecoorbit-deploy"
+              command:           "buildAndPush"
+              Dockerfile:        "ecoorbit_api_usuario/Dockerfile"
+              tags: |
+                $(Build.BuildId)
+                latest
+
+          - task: Docker@2
+            displayName: "Build e Push da imagem"
+            inputs:
+              containerRegistry: "javamssqlrm559982"
+              repository:        "ecoorbit-deploy"
+              command:           "buildAndPush"
+              Dockerfile:        "ecoorbit_api_ia/Dockerfile"
+              tags: |
+                $(Build.BuildId)
+                latest
+
+          - task: Docker@2
+            displayName: "Build e Push da imagem"
+            inputs:
+              containerRegistry: "javamssqlrm559982"
+              repository:        "ecoorbit-deploy"
+              command:           "buildAndPush"
+              Dockerfile:        "ecoorbit_api_predict/Dockerfile"
+              tags: |
+                $(Build.BuildId)
+                latest            

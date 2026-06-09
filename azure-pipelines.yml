@@ -1,53 +1,60 @@
 trigger:
   - teste-branch
+
 pool:
   vmImage: ubuntu-latest
+
 stages:
   - stage: Build
     displayName: "Build e Push para ACR"
     jobs:
       - job: BuildAndPush
         steps:
+
           - task: Docker@2
-            displayName: "Build e Push da imagem"
+            displayName: "Build e Push - ecoorbit-server"
             inputs:
               containerRegistry: "javamssqlrm559982"
-              repository:        "ecoorbit-deploy"
-              command:           "buildAndPush"
-              Dockerfile:        "ecoorbit_api_server/Dockerfile"
+              repository: "ecoorbit-server"
+              command: "buildAndPush"
+              Dockerfile: "ecoorbit_api_server/Dockerfile"
+              buildContext: "ecoorbit_api_server"
               tags: |
                 $(Build.BuildId)
                 latest
 
           - task: Docker@2
-            displayName: "Build e Push da imagem"
+            displayName: "Build e Push - ecoorbit-usuario"
             inputs:
               containerRegistry: "javamssqlrm559982"
-              repository:        "ecoorbit-deploy"
-              command:           "buildAndPush"
-              Dockerfile:        "ecoorbit_api_usuario/Dockerfile"
+              repository: "ecoorbit-usuario"
+              command: "buildAndPush"
+              Dockerfile: "ecoorbit_api_usuario/Dockerfile"
+              buildContext: "ecoorbit_api_usuario"
               tags: |
                 $(Build.BuildId)
                 latest
 
           - task: Docker@2
-            displayName: "Build e Push da imagem"
+            displayName: "Build e Push - ecoorbit-ia"
             inputs:
               containerRegistry: "javamssqlrm559982"
-              repository:        "ecoorbit-deploy"
-              command:           "buildAndPush"
-              Dockerfile:        "ecoorbit_api_ia/Dockerfile"
+              repository: "ecoorbit-ia"
+              command: "buildAndPush"
+              Dockerfile: "ecoorbit_api_ia/Dockerfile"
+              buildContext: "ecoorbit_api_ia"
               tags: |
                 $(Build.BuildId)
                 latest
 
           - task: Docker@2
-            displayName: "Build e Push da imagem"
+            displayName: "Build e Push - ecoorbit-predict"
             inputs:
               containerRegistry: "javamssqlrm559982"
-              repository:        "ecoorbit-deploy"
-              command:           "buildAndPush"
-              Dockerfile:        "ecoorbit_api_predict/Dockerfile"
+              repository: "ecoorbit-predict"
+              command: "buildAndPush"
+              Dockerfile: "ecoorbit_api_predict/Dockerfile"
+              buildContext: "ecoorbit_api_predict"
               tags: |
                 $(Build.BuildId)
-                latest            
+                latest

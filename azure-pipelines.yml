@@ -1,5 +1,5 @@
 trigger:
-  - main
+  - teste-branch
 
 pool:
   vmImage: ubuntu-latest

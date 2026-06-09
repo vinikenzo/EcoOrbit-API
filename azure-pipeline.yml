@@ -1,0 +1,120 @@
+trigger:
+  branches:
+    include:
+      - main
+
+pr: none
+
+pool:
+  vmImage: ubuntu-latest
+
+variables:
+  tag: '$(Build.BuildId)'
+  acrLoginServer: 'SEU_ACR.azurecr.io'
+
+stages:
+  - stage: Build
+    displayName: Build and Test Microservices
+    jobs:
+      - job: build_all
+        displayName: Build all services
+        steps:
+          - checkout: self
+
+          - script: |
+              cd ecoorbit_api_server
+              chmod +x mvnw
+              ./mvnw clean test package
+              cd ..
+
+              cd ecoorbit_api_usuario
+              chmod +x mvnw
+              ./mvnw clean test package
+              cd ..
+
+              cd ecoorbit_api_ia
+              chmod +x mvnw
+              ./mvnw clean test package
+              cd ..
+
+              cd ecoorbit_api_predict
+              mvn clean test package
+              cd ..
+            displayName: Build and test all micro APIs
+
+          - task: PublishTestResults@2
+            inputs:
+              testResultsFormat: 'JUnit'
+              testResultsFiles: '**/target/surefire-reports/TEST-*.xml'
+              failTaskOnFailedTests: true
+
+          - task: CopyFiles@2
+            inputs:
+              Contents: |
+                **/target/*.jar
+                scripts/**
+                dockerfiles/**
+              TargetFolder: '$(Build.ArtifactStagingDirectory)'
+
+          - task: PublishBuildArtifacts@1
+            inputs:
+              PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+              ArtifactName: 'drop'
+              publishLocation: 'Container'
+
+  - stage: Docker
+    displayName: Build and Push Docker Images
+    dependsOn: Build
+    jobs:
+      - job: docker_push
+        displayName: Build and push images
+        steps:
+          - checkout: self
+
+          - task: Docker@2
+            displayName: Build and push ecoorbit-api-server
+            inputs:
+              command: buildAndPush
+              containerRegistry: 'sc-acr-ecoorbit'
+              repository: 'ecoorbit-api-server'
+              Dockerfile: 'dockerfiles/ecoorbit_api_server.Dockerfile'
+              buildContext: 'ecoorbit_api_server'
+              tags: |
+                $(tag)
+                latest
+
+          - task: Docker@2
+            displayName: Build and push ecoorbit-api-usuario
+            inputs:
+              command: buildAndPush
+              containerRegistry: 'sc-acr-ecoorbit'
+              repository: 'ecoorbit-api-usuario'
+              Dockerfile: 'dockerfiles/ecoorbit_api_usuario.Dockerfile'
+              buildContext: 'ecoorbit_api_usuario'
+              tags: |
+                $(tag)
+                latest
+
+          - task: Docker@2
+            displayName: Build and push ecoorbit-api-ia
+            inputs:
+              command: buildAndPush
+              containerRegistry: 'sc-acr-ecoorbit'
+              repository: 'ecoorbit-api-ia'
+              Dockerfile: 'dockerfiles/ecoorbit_api_ia.Dockerfile'
+              buildContext: 'ecoorbit_api_ia'
+              tags: |
+                $(tag)
+                latest
+
+          - task: Docker@2
+            displayName: Build and push ecoorbit-api-predict
+            inputs:
+              command: buildAndPush
+              containerRegistry: 'sc-acr-ecoorbit'
+              repository: 'ecoorbit-api-predict'
+              Dockerfile: 'dockerfiles/ecoorbit_api_predict.Dockerfile'
+              buildContext: 'ecoorbit_api_predict'
+              tags: |
+                $(tag)
+                latest

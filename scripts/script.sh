@@ -3,17 +3,17 @@
 RG="rg-EcoOrbit"
 LOCATION="brazilsouth"
 ACR_NAME="acrecorbit$RANDOM"
-PLAN_NAME="plan-ecoorbit"
+PLAN_NAME="planACRWebApp"
 
-az group create \
-  --name $RG \
-  --location $LOCATION
+#az group create \
+#  --name $RG \
+#  --location $LOCATION
 
-az acr create \
-  --resource-group $RG \
-  --name $ACR_NAME \
-  --sku Basic \
-  --admin-enabled true
+# az acr create \
+#  --resource-group $RG \
+# --name $ACR_NAME \
+#  --sku Basic \
+#  --admin-enabled true
 
 az appservice plan create \
   --name $PLAN_NAME \

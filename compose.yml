@@ -1,10 +1,11 @@
-api_server:
-  build: ./ecoorbit_api_server
-  container_name: ecoorbit_api_server
-  ports:
-    - "8761:8761"
-  networks:
-    - ecoorbit_net
+services:
+  api_server:
+    build: ./ecoorbit_api_server
+    container_name: ecoorbit_api_server
+    ports:
+      - "8761:8761"
+    networks:
+      - ecoorbit_net
 
   api_usuario:
     build: ./ecoorbit_api_usuario
@@ -16,11 +17,20 @@ api_server:
       DB_URL: jdbc:postgresql://postgres:5432/ecoorbit_db
       DB_USERNAME: ${DB_USERNAME:-ecoorbit}
       DB_PASSWORD: ${DB_PASSWORD:-123456}
+
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://api_server:8761/eureka/
+
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_PORT: 5672
+      SPRING_RABBITMQ_USERNAME: ${RABBITMQ_USERNAME:-ecoorbit}
+      SPRING_RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:-ecoorbit123}
     depends_on:
       postgres:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
+      api_server:
+        condition: service_started
     networks:
       - ecoorbit_net
 
@@ -32,6 +42,7 @@ api_server:
     environment:
       JWT_SECRET: ${JWT_SECRET}
       GROQ_API_KEY: ${GROQ_API_KEY}
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://api_server:8761/eureka/
     depends_on:
       - api_server
     networks:
@@ -45,7 +56,46 @@ api_server:
     environment:
       JWT_SECRET: ${JWT_SECRET}
       API_FLASK: ${API_FLASK}
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://api_server:8761/eureka/
     depends_on:
       - api_server
     networks:
       - ecoorbit_net
+
+  postgres:
+    image: postgres:16
+    container_name: ecoorbit_postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: ecoorbit_db
+      POSTGRES_USER: ${DB_USERNAME:-ecoorbit}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-123456}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME:-ecoorbit} -d ecoorbit_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - ecoorbit_net
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: ecoorbit_rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USERNAME:-ecoorbit}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-ecoorbit123}
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - ecoorbit_net
+
+networks:
+  ecoorbit_net:
+    driver: bridge
